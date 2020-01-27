@@ -144,6 +144,10 @@ class ANHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             cid, sid, tid = [query[k][0] for k in ['cid', 'sid', 'tid']]
             self.reply_with_html('Task: ' + tid,
                                  gen_task(cid, sid, tid))
+        elif path == 'taskDefinition':
+            cid, sid, tdid = [query[k][0] for k in ['cid', 'sid', 'tdid']]
+            self.reply_with_html('Task Definition: ' + tdid,
+                                 gen_task_def(cid, sid, tdid))
         elif path == 'containerInstance':
             cid, ciid = [query[k][0] for k in ['cid', 'ciid']]
             self.reply_with_html('Container instance: ' + ciid,
@@ -236,10 +240,15 @@ def gen_service(cid, sid):
     service = awscli('ecs', 'describe-services', '--cluster', cid,
                      '--services', sid)
     service = service['services'][0]
+    tdid = service['taskDefinition']
     tasks = awscli('ecs', 'list-tasks', '--cluster', cid,
                    '--service-name', service['serviceName'])
     tasks = tasks['taskArns']
     return (gen_parents(('cluster', [('cid', cid)], cid))
+            + gen_related(('taskDefinition',
+                           [('cid', cid),
+                            ('sid', sid),
+                            ('tdid', tdid)], tdid))
             + linklist('Tasks', '/task?cid={}&sid={}&tid={}',
                        [[cid, sid, e] for e in tasks])
             + gen_details(service))
@@ -256,6 +265,16 @@ def gen_task(cid, sid, tid):
             + gen_related(('containerInstance',
                            [('cid', cid), ('ciid', ciid)], ciid))
             + gen_details(task))
+
+
+def gen_task_def(cid, sid, tdid):
+    """Generate contents of ECS Task Definition page"""
+    task_def = awscli('ecs', 'describe-task-definition',
+                      '--task-definition', tdid)
+    task_def = task_def['taskDefinition']
+    return (gen_parents(('cluster', [('cid', cid)], cid),
+                        ('service', [('cid', cid), ('sid', sid)], sid))
+            + gen_details(task_def))
 
 
 def gen_cinstance(cid, ciid):
