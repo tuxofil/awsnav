@@ -260,10 +260,15 @@ def gen_task(cid, sid, tid):
                   '--tasks', tid)
     task = task['tasks'][0]
     ciid = task['containerInstanceArn']
+    tdid = task['taskDefinitionArn']
     return (gen_parents(('cluster', [('cid', cid)], cid),
                         ('service', [('cid', cid), ('sid', sid)], sid))
             + gen_related(('containerInstance',
-                           [('cid', cid), ('ciid', ciid)], ciid))
+                           [('cid', cid), ('ciid', ciid)], ciid),
+                          ('taskDefinition',
+                           [('cid', cid),
+                            ('sid', sid),
+                            ('tdid', tdid)], tdid))
             + gen_details(task))
 
 
