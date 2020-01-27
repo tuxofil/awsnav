@@ -69,7 +69,7 @@ def start_server(bindaddr=None, bindport=None):
         bindaddr = DEF_BINDADDR
     if bindport is None:
         bindport = DEF_BINDPORT
-    LOGGER.info('starting at {}:{}...'.format(bindaddr, bindport))
+    LOGGER.info('starting at %s:%r...', bindaddr, bindport)
     # start httpd
     rest_server = ANServer(bindaddr, bindport)
     rest_server.serve_forever()
