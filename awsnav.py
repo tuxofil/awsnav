@@ -116,15 +116,6 @@ class ANHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def process_unsafe(self):
         """HTTP request processing entry point."""
-        if self.command != 'GET':
-            self.send_response(405)
-            self.send_header('Allow', 'GET')
-            self.send_header('Content-Type', 'text/plain')
-            message = '%s\n' % self.responses[405][1]
-            self.send_header('Content-Length', len(message))
-            self.end_headers()
-            self.wfile.write(message)
-            raise RepliedException
         parsed = urlparse.urlparse(self.path)
         query = urlparse.parse_qs(parsed.query)
         # URL path router
