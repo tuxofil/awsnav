@@ -326,7 +326,7 @@ def gen_details(details):
     fmt = '<h2>Details</h2><pre>{}</pre>'
     tooltip_fmt = '<abbr title="{}">{}</abbr>'
     data = json.dumps(details, indent=2)
-    pattern = ':\\s*([0-9]+\\.[0-9]+)'
+    pattern = '[^0-9](1[0-9]{9,9}(\\.[0-9]+)?)'
     timestamps = []
     for match in re.finditer(pattern, data):
         t_str = match.group(1)
