@@ -164,47 +164,8 @@ class ANHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         :param status: HTTP status code
         :type status: int
         """
-        styles = """
-          <style>
-            .tooltip {
-              position: relative;
-              display: inline-block;
-              border-bottom: 1px dotted black;
-            }
-            .tooltip .tooltiptext {
-              visibility: hidden;
-              background-color: #555;
-              color: #fff;
-              text-align: center;
-              border-radius: 3px;
-              padding: 5px 5px;
-              position: absolute;
-              z-index: 1;
-              bottom: 125%;
-              left: 50%;
-              margin-left: -60px;
-              opacity: 0;
-              transition: opacity 0.3s;
-            }
-            .tooltip .tooltiptext::after {
-              content: "";
-              position: absolute;
-              top: 100%;
-              left: 50%;
-              margin-left: -5px;
-              border-width: 5px;
-              border-style: solid;
-              border-color: #555 transparent transparent transparent;
-            }
-            .tooltip:hover .tooltiptext {
-              visibility: visible;
-              opacity: 1;
-            }
-          </style>
-        """
         content = """<!DOCTYPE html>
         <html>
-          {}
           <head>
             <meta charset='utf-8'>
             <title>{}</title>
@@ -215,7 +176,7 @@ class ANHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             [&nbsp;<a href="/">home</a>&nbsp;]
             <h1>{}</h1>{}</body>
         </html>
-        """.format(styles, title, title, content)
+        """.format(title, title, content)
         self.send_response(status)
         self.send_header('Content-Type', 'text/html')
         self.send_header('Content-Length', len(content))
@@ -363,8 +324,7 @@ def gen_parents(*parents):
 def gen_details(details):
     """Generate section with entity details"""
     fmt = '<h2>Details</h2><pre>{}</pre>'
-    tooltip_fmt = ('<span class="tooltip">{}'
-                   '<span class="tooltiptext">{}</span></span>')
+    tooltip_fmt = '<abbr title="{}">{}</abbr>'
     data = json.dumps(details, indent=2)
     pattern = ':\\s*([0-9]+\\.[0-9]+)'
     timestamps = []
@@ -375,7 +335,7 @@ def gen_details(details):
     for t_str, t_float in timestamps:
         t_human = datetime.datetime.utcfromtimestamp(t_float).\
             strftime('%Y-%m-%d %H:%M:%S UTC')
-        data = data.replace(t_str, tooltip_fmt.format(t_str, t_human))
+        data = data.replace(t_str, tooltip_fmt.format(t_human, t_str))
     return fmt.format(data)
 
 
