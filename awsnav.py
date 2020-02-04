@@ -254,6 +254,16 @@ def gen_task(cid, sid, tid):
     task = task['tasks'][0]
     ciid = task['containerInstanceArn']
     tdid = task['taskDefinitionArn']
+    # fetch information about EC2 instance which hosts the task
+    cinst = awscli('ecs', 'describe-container-instances',
+                   '--cluster', cid, '--container-instances', ciid)
+    cinst = cinst['containerInstances'][0]
+    iid = cinst['ec2InstanceId']
+    instance = awscli('ec2', 'describe-instances', '--instance-ids', iid)
+    instance = instance['Reservations'][0]['Instances'][0]
+    pub_ip = instance.get('PublicIpAddress', '')
+    priv_ip = instance.get('PrivateIpAddress', '')
+    inst_type = instance.get('InstanceType', '')
     return (gen_parents(('cluster', [('cid', cid)], cid),
                         ('service', [('cid', cid), ('sid', sid)], sid))
             + gen_related(('containerInstance',
@@ -261,7 +271,11 @@ def gen_task(cid, sid, tid):
                           ('taskDefinition',
                            [('cid', cid),
                             ('sid', sid),
-                            ('tdid', tdid)], tdid))
+                            ('tdid', tdid)], tdid),
+                          ('instance', [('iid', iid)], iid))
+            + gen_extra_info(('Host system public IP', pub_ip),
+                             ('Host system private IP', priv_ip),
+                             ('Host system instance type', inst_type))
             + gen_details(task))
 
 
@@ -319,6 +333,16 @@ def gen_parents(*parents):
                        p[2])
             for p in parents]
     return '<h2>Parent objects</h2><ul>{}</ul>'.format(''.join(data))
+
+
+def gen_extra_info(*entries):
+    """Generate extra information section"""
+    if not entries:
+        return ''
+    entries = ''.join(['<tr><td><b>{}</b><td>{}'.format(k, v)
+                       for k, v in entries if v != ''])
+    return ('<h2>Information</h2>'
+            + '<table border=1>{}</table>'.format(entries))
 
 
 def gen_details(details):
