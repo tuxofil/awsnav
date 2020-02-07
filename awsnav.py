@@ -43,7 +43,7 @@ def main():
         ' for incoming connections.'
         ' Default is %r' % DEF_BINDADDR)
     parser.add_argument(
-        '--bindport',
+        '--bindport', type=int,
         help='TCP port number used by RESTful server to listen'
         ' for incoming connections.'
         ' Default is %r' % DEF_BINDPORT)
