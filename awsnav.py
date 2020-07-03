@@ -223,9 +223,13 @@ def gen_cluster(cid):
     data = data['clusters'][0]
     srvs = awscli('ecs', 'list-services', '--cluster', cid)
     srvs = srvs['serviceArns']
+    cnts = awscli('ecs', 'list-container-instances', '--cluster', cid)
+    cnts = cnts['containerInstanceArns']
     return (gen_details(data)
             + linklist('Services', '/service?cid={}&sid={}',
-                       [[cid, e] for e in srvs]))
+                       [[cid, e] for e in srvs])
+            + linklist('Container Instances', '/containerInstance?cid={}&ciid={}',
+                       [[cid, e] for e in cnts]))
 
 
 def gen_service(cid, sid):
