@@ -25,6 +25,7 @@ LOG_FORMAT = '%(asctime)s %(levelname)s %(name)s %(message)s'
 LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 LOGGER = None
+COMMAND_LINE = []
 
 
 def main():
@@ -120,6 +121,8 @@ class ANHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         query = urlparse.parse_qs(parsed.query)
         # URL path router
         path = parsed.path.strip('/')
+        global COMMAND_LINE
+        COMMAND_LINE = []
         if path == '':
             self.reply_with_html('Clusters', gen_clusters())
         elif path == 'ping':
@@ -164,6 +167,11 @@ class ANHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         :param status: HTTP status code
         :type status: int
         """
+        global COMMAND_LINE
+        if COMMAND_LINE:
+            content += "<h2>Command line</h2><pre>"
+            content += "\n".join([" ".join(e) for e in COMMAND_LINE])
+            content += "</pre>"
         content = """<!DOCTYPE html>
         <html>
           <head>
@@ -376,7 +384,9 @@ def awscli(*args):
 
     :rtype: dict
     """
+    global COMMAND_LINE
     args = ['aws', '--output', 'json'] + list(args)
+    COMMAND_LINE.append(args)
     LOGGER.debug("running AWS CLI as: %r", args)
     proc = subprocess.Popen(args, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
