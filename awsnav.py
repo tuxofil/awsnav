@@ -393,7 +393,10 @@ def awscli(*args):
     stdout, stderr = proc.communicate()
     if stderr:
         LOGGER.debug("STDERR: %r", stderr)
-    return json.loads(stdout)
+    try:
+        return json.loads(stdout)
+    except ValueError:
+        raise ValueError('got invalid JSON: %r; stderr: %r' % (stdout, stderr))
 
 
 if __name__ == '__main__':
